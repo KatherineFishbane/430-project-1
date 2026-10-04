@@ -1,0 +1,26 @@
+{
+  "name": "430-project-1",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/KatherineFishbane/430-Project-1#readme",
+  "bugs": {
+    "url": "https://github.com/KatherineFishbane/430-Project-1/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KatherineFishbane/430-Project-1.git"
+  },
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo \"Test complete\" "
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.12.0",
+    "global": "^4.4.0",
+    "globals": "^17.12.0"
+  }
+}
