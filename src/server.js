@@ -2,6 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const query = require('querystring');
 
 const jsonHandler = require('./jsonResponses.js');
 const htmlHandler = require('./htmlResponses.js');
@@ -21,6 +22,35 @@ const urlStruct = {
   default: jsonHandler.notFound,
 };
 
+const parseBody = (request, response, handler) => {
+  const body = [];
+
+  request.on('error', (err) => {
+    console.dir(err);
+    response.statusCode = 400;
+    response.end();
+  });
+
+  request.on('data', (chunk) => {
+    body.push(chunk);
+  });
+
+  request.on('end', () => {
+    const bodyString = Buffer.concat(body).toString();
+    const type = request.headers['content-type'];
+    if(type === 'application/x-www-form-urlencoded') {
+      request.body = query.parse(bodyString);
+    } else if (type === 'application/json') {
+      request.body = JSON.parse(bodyString);
+    } else {
+      response.writeHead(400, { 'Content-Type': 'application/json' });
+      response.write(JSON.stringify({ error: 'invalid data format' }));
+      return response.end();
+    }
+
+    handler(request, response);
+  });
+};
 const handleGet = (request, response, parsedUrl) => {
   if (urlStruct[parsedUrl.pathname]) {
     return urlStruct[parsedUrl.pathname](request, response, parsedUrl);

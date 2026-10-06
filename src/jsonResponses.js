@@ -106,6 +106,83 @@ const getWeaknesses = (request, response) => {
     return respondJSON(request, response, 200, weaknesses);
 };
 
+const addPokemon = (request, response) => {
+
+  const responseJSON = {
+    message: 'Name, type, height, weight and weaknesses are all required.',
+  };
+
+  const {
+    name,
+    type,
+    height,
+    weight,
+    weaknesses
+  } = request.body;
+
+  if (!name || !type || !height || !weight || !weaknesses) {
+    responseJSON.id = 'missingParams';
+    return respondJSON(request, response, 400, responseJSON);
+  }
+ 
+  let responseCode = 204;
+  if(!pokedex[name]) {
+  const newPokemon = {
+    id: pokedex.length + 1,
+    name,
+    type,
+    height,
+    weight,
+    weaknesses
+  };
+
+
+  pokedex.push(newPokemon);
+
+  responseJSON.message = 'Created Successfully';
+
+  return respondJSON(request, response, 201, newPokemon);
+};
+return respondJSON(request, response, responseCode, responseJSON);
+};
+
+const editPokemon = (request, response) => {
+
+  const responseJSON = {
+    message: 'ID is required.',
+  };
+
+  const id = Number(request.body.id);
+
+  if (!id) {
+    responseJSON.id = 'missingParams';
+    return respondJSON(request, response, 400, responseJSON);
+  }
+
+  if (id < 1 || id > pokedex.length) {
+    responseJSON.id = 'invalidId';
+    return respondJSON(request, response, 400, responseJSON);
+  }
+
+    const index = pokedex.findIndex((pokemon) => pokemon.id === id);// from online mention in documentation findIndex method
+
+  if (pokemonIndex === -1) {
+    responseJSON.message = 'Pokemon not found.';
+    responseJSON.id = 'pokemonNotFound';
+
+    return respondJSON(request, response, 404, responseJSON);
+  }
+
+  pokedex[pokemonIndex] = { //from online mention in documentation ... syntax
+    ...pokedex[pokemonIndex],
+    ...request.body,
+    id: id,
+  };
+
+  return respondJSON(request, response, 204, null);
+};
+
+
 
 
 module.exports = {
