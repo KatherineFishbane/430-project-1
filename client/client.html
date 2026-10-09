@@ -1,12 +1,502 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Pokedex Index</title>
-</head>
-<body>
-    <h1>Pokedex Index</h1>
-</body>
-</html>
 
+<head>
+  <title>Pokedex</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script>
+    const handleResponse = async (response) => {
+
+      const content = document.querySelector('#content');
+
+      switch (response.status) {
+        case 200:
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 201:
+          content.innerHTML = '<b>Created</b>';
+          break;
+        case 204:
+          content.innerHTML = '<b>Updated no Content</b>';
+          return;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404:
+          content.innerHTML = `<b>Not Found</b>`;
+          break;
+        default:
+          content.innerHTML = `Error ${response.status}`;
+          break;
+      }
+
+      const obj = await response.json();
+
+      if (obj.message) {
+        content.innerHTML += `<p>${obj.message}</p>`;
+      }
+
+      if (obj.name) {
+        content.innerHTML += `<p>Pokemon: ${obj.name}</p>`;
+      }
+    };
+
+
+    const sendPost = async (pokemonForm) => {
+
+
+      const url = pokemonForm.getAttribute('action');
+      const method = pokemonForm.getAttribute('method');
+
+      const name = pokemonForm.querySelector('#nameField').value;
+      const type = pokemonForm.querySelector('#typeField').value;
+      const height = pokemonForm.querySelector('#heightField').value;
+      const weight = pokemonForm.querySelector('#weightField').value;
+      const weaknesses = pokemonForm.querySelector('#weaknessesField').value;
+      const dataType = pokemonForm.querySelector('#dataType').value;
+
+
+      let formData =
+        `name=${name}&type=${type}&height=${height}&weight=${weight}&weaknesses=${weaknesses}`;
+
+
+      if (dataType === 'application/json') {
+        formData = JSON.stringify({
+          name,
+          type: [type],
+          height,
+          weight,
+          weaknesses: [weaknesses]
+        });
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': dataType,
+          'Accept': 'application/json',
+        },
+        body: formData,
+      });
+
+      handleResponse(response);
+    };
+
+    const sendEditPost = async (pokemonForm) => {
+
+
+      const url = pokemonForm.getAttribute('action');
+      const method = pokemonForm.getAttribute('method');
+
+      const id = pokemonForm.querySelector('#editId').value;
+      const name = pokemonForm.querySelector('#editName').value;
+      const type = pokemonForm.querySelector('#editType').value;
+      const height = pokemonForm.querySelector('#editHeight').value;
+      const weight = pokemonForm.querySelector('#editWeight').value;
+      const weaknesses = pokemonForm.querySelector('#editWeaknesses').value;
+      const dataType = pokemonForm.querySelector('#editDataType').value;
+
+
+      let formData =
+        `id=${id}&name=${name}&type=${type}&height=${height}` +
+        `&weight=${weight}&weaknesses=${weaknesses}`;
+
+
+      if (dataType === 'application/json') {
+        formData = JSON.stringify({
+          id,
+          name,
+          type: [type],
+          height,
+          weight,
+          weaknesses: [weaknesses]
+        });
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': dataType,
+          'Accept': 'application/json',
+        },
+        body: formData,
+      });
+
+
+      handleResponse(response);
+    };
+
+
+    const getPokemon = async () => {
+
+
+      const name = document.querySelector('#nameFilter').value;
+      const type = document.querySelector('#typeFilter').value;
+      const limit = document.querySelector('#limitFilter').value;
+
+      const params = new URLSearchParams();
+
+      if (name) {
+        params.append('name', name);
+      }
+
+      if (type) {
+        params.append('type', type);
+      }
+
+      if (limit) {
+        params.append('limit', limit);
+      }
+
+      let url = '/getPokemon';
+
+
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+
+      const content = document.querySelector('#pokemonContent');
+
+
+      if (!response.ok) {
+        const obj = await response.json();
+
+        content.innerHTML = `
+      <div class="column">
+        <div class="notification is-danger">
+          ${obj.message}
+        </div>
+      </div>
+    `;
+
+        return;
+      }
+
+
+      const pokemon = await response.json();
+
+
+      content.innerHTML = '';
+
+
+      if (pokemon.length === 0) {
+        content.innerHTML = `
+      <div class="column">
+        <div class="notification is-warning">
+          No Pokemon found.
+        </div>
+      </div>
+    `;
+
+        return;
+      }
+
+
+      pokemon.forEach((item) => {
+
+        content.innerHTML += `
+      <div class="column is-one-quarter">
+        <div class="card">
+
+          <div class="card-image is-flex is-justify-content-center">
+            <figure class="image is-128x128">
+              <img src="${item.img}" alt="${item.name}">
+            </figure>
+          </div>
+
+          <div class="card-content">
+
+            <p class="title is-5">
+              ${item.name}
+            </p>
+
+            <p class="subtitle is-6">
+              #${item.num}
+            </p>
+
+            <p>
+              <strong>Type:</strong>
+              ${item.type.join(', ')}
+            </p>
+
+            <p>
+              <strong>Height:</strong>
+              ${item.height}
+            </p>
+
+            <p>
+              <strong>Weight:</strong>
+              ${item.weight}
+            </p>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+      });
+    };
+    const init = () => {
+
+
+      const pokemonForm = document.querySelector('#pokemonForm');
+
+      const addPokemon = (e) => {
+        e.preventDefault();
+        sendPost(pokemonForm);
+        return false;
+      }
+
+      pokemonForm.addEventListener('submit', addPokemon);
+
+      const editForm = document.querySelector('#editForm');
+
+
+      const editPokemon = (e) => {
+        e.preventDefault();
+        sendEditPost(editForm);
+        return false;
+      }
+
+
+
+      editForm.addEventListener('submit', editPokemon);
+      const filterButton = document.querySelector('#filterButton');
+
+      filterButton.addEventListener('click', () => {
+        getPokemon();
+      });
+
+
+      const clearButton = document.querySelector('#clearButton');
+
+      clearButton.addEventListener('click', () => {
+
+        document.querySelector('#nameFilter').value = '';
+        document.querySelector('#typeFilter').value = '';
+        document.querySelector('#limitFilter').value = '';
+
+        getPokemon();
+      });
+    };
+
+    window.onload = init;
+  </script>
+</head>
+
+<body>
+  <section id="top">
+    <h3>Pokedex</h3>
+
+    <section class="section">
+      <div class="container">
+
+        <h2 class="title has-text-centered">
+          Add a Pokemon
+        </h2>
+
+        <form id="pokemonForm" action="/addPokemon" method="post">
+
+          <div class="columns is-multiline">
+
+            <div class="column is-half">
+              <label class="label" for="nameField">Name</label>
+              <input class="input" id="nameField" type="text" name="name" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="typeField">Type</label>
+              <input class="input" id="typeField" type="text" name="type" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="heightField">Height</label>
+              <input class="input" id="heightField" type="text" name="height" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="weightField">Weight</label>
+              <input class="input" id="weightField" type="text" name="weight" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="weaknessesField">Weaknesses</label>
+              <input class="input" id="weaknessesField" type="text" name="weaknesses" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="dataType">Data Type</label>
+              <div class="select is-fullwidth">
+                <select name="dataType" id="dataType">
+                  <option value="application/x-www-form-urlencoded">
+                    URL Encoded
+                  </option>
+                  <option value="application/json">
+                    JSON
+                  </option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="has-text-centered">
+            <input class="button is-primary" type="submit" value="Add Pokemon">
+          </div>
+
+        </form>
+
+      </div>
+    </section>
+
+
+    <section class="section">
+      <div class="container">
+
+        <h2 class="title has-text-centered">
+          Edit a Pokemon
+        </h2>
+
+        <form id="editForm" action="/editPokemon" method="post">
+
+          <div class="columns is-multiline">
+
+            <div class="column is-full">
+              <label class="label" for="editId">Pokemon ID</label>
+              <input class="input" id="editId" type="number" name="id" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="editName">Name</label>
+              <input class="input" id="editName" type="text" name="name" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="editType">Type</label>
+              <input class="input" id="editType" type="text" name="type" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="editHeight">Height</label>
+              <input class="input" id="editHeight" type="text" name="height" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="editWeight">Weight</label>
+              <input class="input" id="editWeight" type="text" name="weight" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="editWeaknesses">Weaknesses</label>
+              <input class="input" id="editWeaknesses" type="text" name="weaknesses" required>
+            </div>
+
+            <div class="column is-half">
+              <label class="label" for="editDataType">Data Type</label>
+              <div class="select is-fullwidth">
+                <select name="dataType" id="editDataType">
+                  <option value="application/x-www-form-urlencoded">
+                    URL Encoded
+                  </option>
+                  <option value="application/json">
+                    JSON
+                  </option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="has-text-centered">
+            <input class="button is-link" type="submit" value="Edit Pokemon">
+          </div>
+
+        </form>
+
+      </div>
+    </section>
+
+    <p>Go to <a href="/getPokemon">/getPokemon</a> to see Pokemon.</p>
+    <p>Go to <a href="/getTypes">/getTypes</a> to see Pokemon types.</p>
+    <p>Go to <a href="/getWeaknesses">/getWeaknesses</a> to see Pokemon weaknesses.</p>
+
+    <section class="section">
+      <div class="container">
+
+        <h2 class="title has-text-centered">
+          Response
+        </h2>
+
+        <div id="content">
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+
+        <h2 class="title has-text-centered">
+          Pokemon
+        </h2>
+        <section class="section">
+          <div class="container">
+
+            <h2 class="title has-text-centered">
+              Find Pokemon
+            </h2>
+
+            <div class="columns">
+
+              <div class="column">
+                <label class="label" for="nameFilter">Name</label>
+                <input class="input" id="nameFilter" type="text" placeholder="Search by name">
+              </div>
+
+              <div class="column">
+                <label class="label" for="typeFilter">Type</label>
+                <input class="input" id="typeFilter" type="text" placeholder="Search by type">
+              </div>
+
+              <div class="column">
+                <label class="label" for="limitFilter">Limit</label>
+                <input class="input" id="limitFilter" type="number" min="1" placeholder="Number of Pokemon">
+              </div>
+
+            </div>
+
+            <div class="has-text-centered">
+              <button id="filterButton" class="button is-primary">
+                Search Pokemon
+              </button>
+
+              <button id="clearButton" class="button is-light">
+                Clear
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        <div id="pokemonContent" class="columns is-multiline">
+        </div>
+
+      </div>
+    </section>
+
+
+</body>
+
+</html>

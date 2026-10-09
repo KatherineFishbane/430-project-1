@@ -112,7 +112,7 @@ const addPokemon = (request, response) => {
     message: 'Name, type, height, weight and weaknesses are all required.',
   };
 
-  const {
+  let {
     name,
     type,
     height,
@@ -124,6 +124,14 @@ const addPokemon = (request, response) => {
     responseJSON.id = 'missingParams';
     return respondJSON(request, response, 400, responseJSON);
   }
+
+  if (typeof type === 'string') {//mention in doc got help on this
+        type = [type];
+    }
+
+    if (typeof weaknesses === 'string') {
+        weaknesses = [weaknesses];
+    }
  
   let responseCode = 204;
   if(!pokedex[name]) {
@@ -154,7 +162,7 @@ const editPokemon = (request, response) => {
 
   const id = Number(request.body.id);
 
-  if (!id) {
+  if (!id|| !request.body.name || !request.body.type || !request.body.height || !request.body.weight || !request.body.weaknesses) {
     responseJSON.id = 'missingParams';
     return respondJSON(request, response, 400, responseJSON);
   }
@@ -164,25 +172,21 @@ const editPokemon = (request, response) => {
     return respondJSON(request, response, 400, responseJSON);
   }
 
-    const index = pokedex.findIndex((pokemon) => pokemon.id === id);// from online mention in documentation findIndex method
+    const index = pokedex.findIndex((pokemon) => pokemon.id === Number(request.body.id));// from online mention in documentation findIndex method
 
-  if (pokemonIndex === -1) {
+  if (index === -1) {
     responseJSON.message = 'Pokemon not found.';
     responseJSON.id = 'pokemonNotFound';
 
     return respondJSON(request, response, 404, responseJSON);
   }
 
-  pokedex[pokemonIndex] = { //from online mention in documentation ... syntax
-    ...pokedex[pokemonIndex],
-    ...request.body,
-    id: id,
-  };
+   request.body.id = Number(request.body.id);
+
+    pokedex[index] = request.body;
 
   return respondJSON(request, response, 204, null);
 };
-
-
 
 
 module.exports = {
@@ -191,6 +195,8 @@ module.exports = {
     getWeaknesses,
     getTypes,
     setPokedex,
-    notFound
+    notFound,
+    addPokemon,
+    editPokemon
 };
 

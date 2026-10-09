@@ -51,6 +51,19 @@ const parseBody = (request, response, handler) => {
     handler(request, response);
   });
 };
+
+const handlePost = (request, response, parsedUrl) => {
+  if (parsedUrl.pathname === '/addPokemon') {
+    return parseBody(request, response, jsonHandler.addPokemon);
+  }
+
+  if (parsedUrl.pathname === '/editPokemon') {
+    return parseBody(request, response, jsonHandler.editPokemon);
+  }
+
+  return jsonHandler.notFound(request, response);
+};
+
 const handleGet = (request, response, parsedUrl) => {
   if (urlStruct[parsedUrl.pathname]) {
     return urlStruct[parsedUrl.pathname](request, response, parsedUrl);
@@ -81,14 +94,6 @@ const handleHead = (request, response, parsedUrl) => {
   return jsonHandler.notFound(request, response);
 };
 
-/*const handlePost = (request, response, parsedUrl) => {
-
-  if (parsedUrl.pathname === '/addUser') {
-    return parseBody(request, response, jsonHandler.addUser);
-  }
-
-  return jsonHandler.notFound(request, response);
-};*/
 const onRequest = (request, response) => {
 
   const protocol = request.connection.encrypted ? 'https' : 'http';
@@ -102,9 +107,9 @@ const onRequest = (request, response) => {
     return handleHead(request, response, parsedUrl);
   }
 
-  //if (request.method === 'POST') {
-  //  return handlePost(request, response, parsedUrl);
-  //}
+  if (request.method === 'POST') {
+    return handlePost(request, response, parsedUrl);
+  }
 
 
   return jsonHandler.notFound(request, response);
