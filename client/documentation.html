@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pokedex API Documentation</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css"
+  >
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <section class="hero is-primary">
+    <div class="hero-body">
+      <div class="container">
+        <a class="button is-light" href="/">Back to Pokedex</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container">
+      <h2>This is the documentation for the pokedfex api </h2>
+      <p>The base url is: (please remember to put this in after i put on herokui)</p>
+      <p>/getPokemon (by itself) this will return all the pokemon) but can be modified with query parameters<br>
+        Examples:<br>
+        /getPokemon?name=zap <br>
+        /getPokemon?type=fire<br>
+        /getPokemon?limit=10<br>
+        you can also do getPokemon/id for example /getPokemon/1 </p>
+    <p>The success response is a json object with a code of 200 unless the pokemon is not found  then you will get a 404</p>
+    <p>There is also: /getTypes, and /getWeakness</p>
+    <p>The post is addPokemon 201 and editPokemon 204 (I tried to make edit pokemon work if you only want to change one field but failed also I think 204 is right but im not sure)</p>
+    <p>the standard format of the endpoints is json but the post also has url encoded </p>
+
+    
+
+
+    </div>
+  </main>
+
+</body>
+</html>

@@ -10,6 +10,10 @@ body {
 .card {
   height: 100%;
 }
+p {
+  margin-bottom: 0.5rem;
+  color: #000000;
+}
 
 .card-image {
   padding-top: 1.5rem;

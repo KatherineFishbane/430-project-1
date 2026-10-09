@@ -19,6 +19,7 @@ const urlStruct = {
   '/getPokemon': jsonHandler.getPokemon,
   '/getTypes': jsonHandler.getTypes,
   '/getWeaknesses': jsonHandler.getWeaknesses,
+  '/documentation': htmlHandler.getDocumentation,
   default: jsonHandler.notFound,
 };
 
